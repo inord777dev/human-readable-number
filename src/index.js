@@ -3,8 +3,13 @@ module.exports = function toReadable(number) {
         return "zero";
     }
     let digits = [];
-    for (let i = 1; i <= 3; i++) {
+    let result = [];
+    let rank = 0;
+    let value;
+    let groupName = "";
+    while (number > 0) {
         let digit = getDigit(number, i);
+        let hundreds = 0, tens = 0, ones = 0;
         switch (digit) {
             case 0:
                 digits.push("zero");
@@ -37,104 +42,41 @@ module.exports = function toReadable(number) {
                 digits.push("nine");
                 break;
         }
+
+
+        if (rank == 1 || rank % 4 == 0) {
+            ones = digit;
+            result.push(digitToText(0, 0, ones, groupName));
+        } else if (rank % 2 == 0) {
+            tens = digit;
+            result.pop();
+            result.push(digitToText(0, tens, ones, groupName));
+        } else if (rank % 3 == 0) {
+            hundreds = digit;
+            result.push(digitToText(hundreds, tens, ones, groupName));
+            ones = 0;
+            tens = 0;
+            hundreds = 0;
+        }
+        if (rank >= 7 ) {
+            groupName = "million";
+        } else if (rank >= 4) {
+            groupName = "thousand";
+        } 
+
         number = Math.floor(number / 10);
-        if (number == 0) {
-            break;
-        }
-    }
 
-    let result = [];
-
-    if (digits.length > 2) {
-        result.push(digits[2] + " hundred");
-        digits.pop();
-        if (digits[1] == "zero") {
-            digits.pop();
-        }
-        if (digits[0] == "zero") {
-            digits.pop();
-        }
-        if ((digits[1] != "zero") && (digits[0] != "zero")) {
-            result.push(" ");
-        }
-    }
-
-    if (digits.length > 1) {
-        let subtext;
-        if (digits[1] == "one") {
-            if (digits[0] == "zero") {
-                subtext = "ten";
-            } else if (digits[0] == "one") {
-                subtext = "eleven";
-            } else if (digits[0] == "two") {
-                subtext = "twelve";
-            } else if (digits[0] == "three") {
-                subtext = "thirteen";
-            } else if (digits[0] == "five") {
-                subtext = "fifteen";
-            } else if (digits[0] == "eight") {
-                subtext = "eighteen";
-            } else {
-                subtext = digits[0] + "teen";
-            }
-            result.push(subtext);
-            digits.pop();
-        } else if (digits[1] == "two") {
-            result.push("twenty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        } else if (digits[1] == "three") {
-            result.push("thirty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        } else if (digits[1] == "four") {
-            result.push("forty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        } else if (digits[1] == "five") {
-            result.push("fifty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        } else if (digits[1] == "eight") {
-            result.push("eighty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        }
-        else {
-            result.push(digits[1] + "ty");
-            if (digits[0] == "zero") {
-                digits.pop();
-            } else {
-                result.push(" ");
-            }
-        }
-        digits.pop();
-    }
-
-    if (digits.length > 0) {
-        result.push(digits[0]);
+        rank = rank + 1;
+        digits.push([]);
+        result.push([]);
     }
 
     let text = "";
     let index = 0;
-
     while (index < result.length) {
-        text += result[index];
+        if (result[index] != "zero") {
+            text += (index == 0 ? "" : " ") + result[index];
+        }
         index = index + 1;
     }
 
@@ -143,4 +85,53 @@ module.exports = function toReadable(number) {
 
 function getDigit(number, n) {
     return number % Math.pow(10, 1);
+}
+
+function digitToText(hundreds, tens, ones, groupName = "") {
+    let text = "";
+
+    if (hundreds > 0) {
+        text = hundreds + " hundred";
+    }
+
+    if (tens > 1) {
+        let subtext;
+        if (tens == "one") {
+            if (ones == "zero") {
+                subtext = "ten";
+            } else if (ones == "one") {
+                subtext = "eleven";
+            } else if (ones == "two") {
+                subtext = "twelve";
+            } else if (ones == "three") {
+                subtext = "thirteen";
+            } else if (ones == "five") {
+                subtext = "fifteen";
+            } else if (ones == "eight") {
+                subtext = "eighteen";
+            } else {
+                subtext = ones + "teen";
+            }
+        } else if (tens == "two") {
+            subtext = "twenty";
+        } else if (digits[rank][1] == "three") {
+            subtext = "thirty";
+        } else if (digits[rank][1] == "four") {
+            subtext = "forty";
+        } else if (digits[rank][1] == "five") {
+            subtext = "fifty";
+        } else if (digits[1] == "eight") {
+            subtext = "eighty";
+        }
+        else {
+            subtext = tens + "ty";
+        }
+        subtext = (text == "" ? "" : " ") + subtext;
+    }
+
+    if (ones > 0) {
+        text = (text == "" ? "" : " ") + ones;
+    }
+
+    return text;
 }
