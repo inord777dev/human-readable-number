@@ -8,7 +8,7 @@ module.exports = function toReadable(number) {
     let value;
     let groupName = "";
     while (number > 0) {
-        let digit = getDigit(number, i);
+        let digit = getDigit(number, rank);
         let hundreds = 0, tens = 0, ones = 0;
         switch (digit) {
             case 0:
