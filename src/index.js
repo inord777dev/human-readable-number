@@ -4,134 +4,147 @@ module.exports = function toReadable(number) {
     }
     let digits = [];
     let result = [];
-    let rank = 0;
+    let rank = 1;
     let value;
     let groupName = "";
+    let hundreds = 0, tens = 0, ones = 0;
     while (number > 0) {
         let digit = getDigit(number, rank);
-        let hundreds = 0, tens = 0, ones = 0;
-        switch (digit) {
-            case 0:
-                digits.push("zero");
-                break;
-            case 1:
-                digits.push("one");
-                break;
-            case 2:
-                digits.push("two");
-                break;
-            case 3:
-                digits.push("three");
-                break;
-            case 4:
-                digits.push("four");
-                break;
-            case 5:
-                digits.push("five");
-                break;
-            case 6:
-                digits.push("six");
-                break;
-            case 7:
-                digits.push("seven");
-                break;
-            case 8:
-                digits.push("eight");
-                break;
-            case 9:
-                digits.push("nine");
-                break;
-        }
-
-
-        if (rank == 1 || rank % 4 == 0) {
+        if (rank == 1 || rank > 3 && rank % 3 == 1) {
             ones = digit;
-            result.push(digitToText(0, 0, ones, groupName));
-        } else if (rank % 2 == 0) {
+            value = digitsToText(0, 0, ones, groupName);
+            result.push(value);
+        } else if (rank == 2 || rank > 3 && rank % 3 == 2) {
             tens = digit;
+            value = digitsToText(0, tens, ones, groupName);
             result.pop();
-            result.push(digitToText(0, tens, ones, groupName));
-        } else if (rank % 3 == 0) {
+            result.push(value);
+        } else if (rank == 3 || rank > 3 && rank % 3 == 0) {
             hundreds = digit;
-            result.push(digitToText(hundreds, tens, ones, groupName));
+            value = digitsToText(hundreds, tens, ones, groupName);
+            result.pop();
+            result.push(value);
             ones = 0;
             tens = 0;
             hundreds = 0;
         }
-        if (rank >= 7 ) {
-            groupName = "million";
-        } else if (rank >= 4) {
-            groupName = "thousand";
-        } 
 
         number = Math.floor(number / 10);
 
+        switch(rank){
+            case 3: 
+                groupName = "thousand";
+                break;
+            case 6: 
+                groupName = "million";
+                break;
+            case 9: 
+                groupName = "trillion";
+                break;
+        }
         rank = rank + 1;
-        digits.push([]);
-        result.push([]);
     }
 
     let text = "";
-    let index = 0;
-    while (index < result.length) {
+    let index = result.length - 1;
+    while (index >= 0) {
         if (result[index] != "zero") {
-            text += (index == 0 ? "" : " ") + result[index];
+            text += (index == result.length - 1 ? "" : " ") + result[index];
         }
-        index = index + 1;
+        index = index - 1;
     }
 
-    return text;
+    return text.trim();
 }
 
 function getDigit(number, n) {
     return number % Math.pow(10, 1);
 }
 
-function digitToText(hundreds, tens, ones, groupName = "") {
+function digitToText(digit) {
+    let value;
+
+    switch (digit) {
+        case 0:
+            value = "zero";
+            break;
+        case 1:
+            value = "one";
+            break;
+        case 2:
+            value = "two";
+            break;
+        case 3:
+            value = "three";
+            break;
+        case 4:
+            value = "four";
+            break;
+        case 5:
+            value = "five";
+            break;
+        case 6:
+            value = "six";
+            break;
+        case 7:
+            value = "seven";
+            break;
+        case 8:
+            value = "eight";
+            break;
+        case 9:
+            value = "nine";
+            break;
+    }
+    return value;
+}
+
+
+function digitsToText(hundreds, tens, ones, groupName = "") {
     let text = "";
+    let subtext = "";
 
     if (hundreds > 0) {
-        text = hundreds + " hundred";
+        text = digitToText(hundreds) + " hundred";
     }
 
-    if (tens > 1) {
-        let subtext;
-        if (tens == "one") {
-            if (ones == "zero") {
+    if (tens > 0) {
+        if (tens == 1) {
+            if (ones == 0) {
                 subtext = "ten";
-            } else if (ones == "one") {
+            } else if (ones == 1) {
                 subtext = "eleven";
-            } else if (ones == "two") {
+            } else if (ones == 2) {
                 subtext = "twelve";
-            } else if (ones == "three") {
+            } else if (ones == 3) {
                 subtext = "thirteen";
-            } else if (ones == "five") {
+            } else if (ones == 5) {
                 subtext = "fifteen";
-            } else if (ones == "eight") {
+            } else if (ones == 8) {
                 subtext = "eighteen";
             } else {
-                subtext = ones + "teen";
+                subtext = digitToText(ones) + "teen";
             }
-        } else if (tens == "two") {
+        } else if (tens == 2) {
             subtext = "twenty";
-        } else if (digits[rank][1] == "three") {
+        } else if (tens == 3) {
             subtext = "thirty";
-        } else if (digits[rank][1] == "four") {
+        } else if (tens == 4) {
             subtext = "forty";
-        } else if (digits[rank][1] == "five") {
+        } else if (tens == 5) {
             subtext = "fifty";
-        } else if (digits[1] == "eight") {
+        } else if (tens == 8) {
             subtext = "eighty";
         }
         else {
-            subtext = tens + "ty";
+            subtext = digitToText(tens) + "ty";
         }
-        subtext = (text == "" ? "" : " ") + subtext;
+        text += (text == "" ? "" : " ") + subtext;
+    } 
+
+    if (ones > 0 && tens != 1) {
+        text += (text == "" ? "" : " ") + digitToText(ones);
     }
 
-    if (ones > 0) {
-        text = (text == "" ? "" : " ") + ones;
-    }
-
-    return text;
+    return text + (groupName == "" ||  text == "" ? "": " " + groupName);
 }

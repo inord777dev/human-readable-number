@@ -6005,17 +6005,5 @@ it('Should return \'nine hundred ninety nine\' when 999 given', () => {
 it('Should return \'one thousand\' when 1000 given', () => {
   const readable = toReadable(1000);
 
-  assert.equal(readable, 'one hundred');
-});
-
-it('Should return \'twenty one thousand\' when 21000 given', () => {
-  const readable = toReadable(21000);
-
-  assert.equal(readable, 'wenty one hundred');
-});
-
-it('Should return \'three hundred twenty one thousand\' when 999 given', () => {
-  const readable = toReadable(321000);
-
-  assert.equal(readable, 'three hundred twenty one thousand');
+  assert.equal(readable, 'one thousand');
 });
